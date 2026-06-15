@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>College Helpdesk Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: url("{{ url_for('static', filename='bgg.jpeg') }}") no-repeat center center fixed;
+            background-color: #f4f6f7;
+            padding: 30px;
+        }
+        .logout-btn, .admin-btn, .toggle-btn {
+            float: right;
+            padding: 8px 16px;
+            margin-left: 10px;
+            border-radius: 5px;
+            text-decoration: none;
+            color: white;
+        }
+        .logout-btn {
+            background-color: #dc3545;
+        }
+        .admin-btn {
+            background-color: #28a745;
+        }
+        .toggle-btn {
+            background-color: #007bff;
+        }
+        .chat-container {
+            max-width: 700px;
+            margin: 80px auto 0;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+        }
+        .chat-box {
+            height: 300px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            padding: 15px;
+            background-color: #fdfdfd;
+        }
+        .chat-message {
+            display: flex;
+            margin: 5px 0;
+        }
+        .user-msg {
+            color: blue;
+            margin-left: auto;
+            text-align: right;
+        }
+        .bot-msg {
+            color: green;
+            margin-right: auto;
+            text-align: left;
+        }
+        input[type="text"] {
+            width: 80%;
+            padding: 10px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        .ai-status {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <a class="logout-btn" href="/logout">Logout</a>
+    <a href="{{ url_for('feedback') }}">
+    <button>Give Feedback</button>
+</a>
+    <form action="/toggle-ai" method="POST" style="display:inline;">
+        <button class="toggle-btn" type="submit">
+            {% if use_ai %}🔴 Turn AI OFF{% else %}🟢 Turn AI ON{% endif %}
+        </button>
+    </form>
+    {% if session['role'] == 'admin' %}
+        <a class="admin-btn" href="/admin">Admin Panel</a>
+    {% endif %}
+    <div class="chat-container">
+        <h2>Welcome to College Helpdesk Chatbot</h2>
+        <div class="ai-status">🧠 AI Mode: {% if use_ai %}ON{% else %}OFF{% endif %}</div>
+        <div class="chat-box" id="chat-box"></div>
+        <input type="text" id="user-input" placeholder="Type your message...">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        function sendMessage() {
+            const userInput = document.getElementById("user-input");
+            const message = userInput.value;
+            if (!message.trim()) return;
+
+            const chatBox = document.getElementById("chat-box");
+            chatBox.innerHTML += "<div class='chat-message user-msg'>You: " + message + "</div>";
+            userInput.value = "";
+
+            fetch("/chat", {
+                method: "POST",
+                body: JSON.stringify({ message }),
+                headers: { "Content-Type": "application/json" }
+            })
+            .then(res => res.json())
+            .then(data => {
+                chatBox.innerHTML += "<div class='chat-message bot-msg'>Bot: " + data.response + "</div>";
+                chatBox.scrollTop = chatBox.scrollHeight;
+            });
+        }
+    </script>
+</body>
+</html>

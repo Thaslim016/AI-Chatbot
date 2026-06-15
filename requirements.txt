@@ -1,0 +1,5 @@
+Flask
+sentence-transformers
+torch
+pandas
+flask_sqlalchemy
